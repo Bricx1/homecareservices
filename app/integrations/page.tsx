@@ -296,7 +296,8 @@ export default function IntegrationsPage() {
       })
 
       if (!response.ok) {
-        throw new Error("Failed to toggle integration")
+        const data = await response.json().catch(() => ({}))
+        throw new Error(data?.error ?? "Failed to toggle integration")
       }
 
       const { enabled } = await response.json()
