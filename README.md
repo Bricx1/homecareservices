@@ -26,3 +26,15 @@ pnpm dev
 ```
 
 Note: Without installing dependencies, `npm run lint`, `npm run build`, and `npx tsc --noEmit` will fail.
+
+## Integration API
+
+The backend exposes endpoints under `/api/integrations` for managing third-party integrations. These routes store their settings in **Firebase Firestore**:
+
+- `GET /api/integrations` – list all integrations
+- `GET /api/integrations/[id]` – fetch a single integration record
+- `POST /api/integrations/[id]` – enable or disable an integration
+- `GET /api/integrations/[id]/config` – retrieve saved configuration
+- `POST /api/integrations/[id]/config` – save configuration (expects `{ config: {...} }`)
+
+Individual integrations also provide `/configure` and `/test-connection` endpoints for saving credentials and verifying connectivity.
