@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
+import { saveProcessedFax } from "@/lib/fax-db"
 
 interface IncomingFax {
   id: string
@@ -62,6 +63,19 @@ export async function POST(request: NextRequest) {
 
     // Step 5: Execute the routing action
     await executeRoutingAction(processedFax)
+
+    // Save fax details to the database
+    await saveProcessedFax({
+      faxId: faxData.id,
+      fromNumber: faxData.from,
+      toNumber: faxData.to,
+      status: faxData.status,
+      pages: faxData.pages,
+      receivedAt: faxData.timestamp,
+      ocrText,
+      classification: classification.category,
+      action: routing.action,
+    })
 
     return NextResponse.json({
       success: true,
