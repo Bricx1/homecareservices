@@ -1,4 +1,4 @@
-import pool from './mysql'
+import db from './firebase'
 
 export interface FaxRecord {
   faxId: string
@@ -13,30 +13,18 @@ export interface FaxRecord {
 }
 
 export async function saveProcessedFax(record: FaxRecord) {
-  const sql = `INSERT INTO processed_faxes
-    (fax_id, from_number, to_number, status, pages, received_at, ocr_text, classification, action)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
-
-  await pool.execute(sql, [
-    record.faxId,
-    record.fromNumber,
-    record.toNumber,
-    record.status,
-    record.pages,
-    record.receivedAt,
-    record.ocrText,
-    record.classification,
-    record.action,
-  ])
+  await db.collection('processed_faxes').doc(record.faxId).set(record)
 }
 
 export async function getProcessedFaxes(): Promise<FaxRecord[]> {
-  const [rows] = await pool.query('SELECT * FROM processed_faxes ORDER BY received_at DESC')
-  return rows as FaxRecord[]
+  const snapshot = await db
+    .collection('processed_faxes')
+    .orderBy('receivedAt', 'desc')
+    .get()
+  return snapshot.docs.map((doc) => doc.data() as FaxRecord)
 }
 
 export async function getProcessedFaxById(faxId: string): Promise<FaxRecord | null> {
-  const [rows] = await pool.query('SELECT * FROM processed_faxes WHERE fax_id = ?', [faxId])
-  const records = rows as FaxRecord[]
-  return records[0] || null
+  const doc = await db.collection('processed_faxes').doc(faxId).get()
+  return doc.exists ? (doc.data() as FaxRecord) : null
 }

@@ -1,4 +1,4 @@
-import pool from './mysql'
+import db from './firebase'
 
 export interface IntegrationRecord {
   id: string
@@ -8,22 +8,15 @@ export interface IntegrationRecord {
 }
 
 export async function getIntegrations(): Promise<IntegrationRecord[]> {
-  const [rows] = await pool.query('SELECT * FROM integrations ORDER BY id')
-  return (rows as any[]).map((row) => ({
-    ...row,
-    enabled: Boolean(row.enabled),
-  })) as IntegrationRecord[]
+  const snapshot = await db.collection('integrations').get()
+  return snapshot.docs.map((doc) => doc.data() as IntegrationRecord)
 }
 
 export async function getIntegrationById(id: string): Promise<IntegrationRecord | null> {
-  const [rows] = await pool.query('SELECT * FROM integrations WHERE id = ?', [id])
-  const record = (rows as any[])[0]
-  return record ? { ...record, enabled: Boolean(record.enabled) } : null
+  const doc = await db.collection('integrations').doc(id).get()
+  return doc.exists ? (doc.data() as IntegrationRecord) : null
 }
 
 export async function updateIntegrationEnabled(id: string, enabled: boolean) {
-  await pool.execute(
-    'UPDATE integrations SET enabled = ? WHERE id = ?',
-    [enabled ? 1 : 0, id],
-  )
+  await db.collection('integrations').doc(id).update({ enabled })
 }
