@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
+import { saveIntegrationConfig } from "@/lib/integration-config-db"
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,8 +16,10 @@ export async function POST(request: NextRequest) {
       syncSettings,
     })
 
-    // Simulate saving configuration
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    await saveIntegrationConfig("extendedcare", {
+      credentials,
+      syncSettings,
+    })
 
     return NextResponse.json({
       success: true,

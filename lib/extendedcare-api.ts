@@ -45,6 +45,32 @@ export interface Referral {
   socDueDate?: string
 }
 
+// Helper for real ExtendedCare API requests
+export async function extendedCareRequest(path: string, options: RequestInit = {}) {
+  const baseUrl = process.env.EXTENDEDCARE_BASE_URL
+  const apiKey = process.env.EXTENDEDCARE_API_KEY
+  if (!baseUrl || !apiKey) throw new Error('ExtendedCare API not configured')
+
+  const res = await fetch(`${baseUrl}${path}`, {
+    ...options,
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+      ...(options.headers || {}),
+    },
+  })
+
+  if (!res.ok) {
+    throw new Error(`ExtendedCare API request failed with status ${res.status}`)
+  }
+
+  return res.json()
+}
+
+export async function testExtendedCareConnection() {
+  return extendedCareRequest('/ping')
+}
+
 // Mock ExtendedCare API client
 class ExtendedCareAPI {
   async checkEligibility(patientId: string, insuranceId: string): Promise<EligibilityResponse> {

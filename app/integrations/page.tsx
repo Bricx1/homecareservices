@@ -1,6 +1,6 @@
-"use client"
+'use client'
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -285,22 +285,49 @@ export default function IntegrationsPage() {
   const [isNewIntegrationOpen, setIsNewIntegrationOpen] = useState(false)
   const [runningWorkflows, setRunningWorkflows] = useState<Set<string>>(new Set())
 
-  const toggleIntegration = async (id: string) => {
-    setIntegrations((prev) =>
-      prev.map((integration) =>
-        integration.id === id ? { ...integration, enabled: !integration.enabled } : integration,
-      ),
-    )
+  useEffect(() => {
+    async function loadIntegrations() {
+      try {
+        const res = await fetch('/api/integrations')
+        if (!res.ok) throw new Error('Failed to load integrations')
+        const data = await res.json()
+        if (Array.isArray(data.integrations)) {
+          setIntegrations((prev) =>
+            prev.map((int) => {
+              const found = data.integrations.find((f: any) => f.id === int.id)
+              return found ? { ...int, ...found } : int
+            }),
+          )
+        }
+      } catch (err) {
+        console.error('Error loading integrations', err)
+      }
+    }
+    loadIntegrations()
+  }, [])
 
-    // Simulate API call
+  const toggleIntegration = async (id: string) => {
     try {
       const response = await fetch(`/api/integrations/${id}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ enabled: !integrations.find((i) => i.id === id)?.enabled }),
+        body: JSON.stringify({
+          enabled: !integrations.find((i) => i.id === id)?.enabled,
+        }),
       })
 
-      if (!response.ok) throw new Error("Failed to toggle integration")
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok) {
+        throw new Error((data as any)?.error ?? "Failed to toggle integration")
+      }
+
+      const { enabled } = data as { enabled?: boolean }
+
+      setIntegrations((prev) =>
+        prev.map((integration) =>
+          integration.id === id ? { ...integration, enabled } : integration,
+        ),
+      )
     } catch (error) {
       console.error("Error toggling integration:", error)
     }

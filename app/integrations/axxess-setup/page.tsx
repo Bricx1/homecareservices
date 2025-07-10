@@ -1,6 +1,4 @@
-{
-  ;("use client")
-}
+'use client'
 
 import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -52,8 +50,28 @@ export default function AxxessSetup() {
   }
 
   const saveConfiguration = async () => {
-    // Implement save logic here
-    alert("Configuration saved!")
+    try {
+      const saveRes = await fetch("/api/integrations/axxess/configure", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ credentials, syncSettings }),
+      })
+
+      if (!saveRes.ok) throw new Error("Failed to save configuration")
+
+      const enableRes = await fetch("/api/integrations/axxess", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ enabled: true }),
+      })
+
+      if (!enableRes.ok) throw new Error("Failed to enable integration")
+
+      alert("Configuration saved!")
+    } catch (error) {
+      console.error("Error saving Axxess configuration", error)
+      alert("Failed to save configuration")
+    }
   }
 
   return (
