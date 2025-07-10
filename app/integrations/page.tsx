@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -284,6 +284,27 @@ export default function IntegrationsPage() {
 
   const [isNewIntegrationOpen, setIsNewIntegrationOpen] = useState(false)
   const [runningWorkflows, setRunningWorkflows] = useState<Set<string>>(new Set())
+
+  useEffect(() => {
+    async function loadIntegrations() {
+      try {
+        const res = await fetch('/api/integrations')
+        if (!res.ok) throw new Error('Failed to load integrations')
+        const data = await res.json()
+        if (Array.isArray(data.integrations)) {
+          setIntegrations((prev) =>
+            prev.map((int) => {
+              const found = data.integrations.find((f: any) => f.id === int.id)
+              return found ? { ...int, ...found } : int
+            }),
+          )
+        }
+      } catch (err) {
+        console.error('Error loading integrations', err)
+      }
+    }
+    loadIntegrations()
+  }, [])
 
   const toggleIntegration = async (id: string) => {
     try {
