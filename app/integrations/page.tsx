@@ -316,12 +316,12 @@ export default function IntegrationsPage() {
         }),
       })
 
+      const data = await response.json().catch(() => ({}))
       if (!response.ok) {
-        const data = await response.json().catch(() => ({}))
-        throw new Error(data?.error ?? "Failed to toggle integration")
+        throw new Error((data as any)?.error ?? "Failed to toggle integration")
       }
 
-      const { enabled } = await response.json()
+      const { enabled } = data as { enabled?: boolean }
 
       setIntegrations((prev) =>
         prev.map((integration) =>
