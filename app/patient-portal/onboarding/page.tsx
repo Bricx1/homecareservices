@@ -319,4 +319,20 @@ export default function PatientOnboarding() {
                       <Checkbox
                         id="hasComputer"
                         checked={formData.hasComputer}
-                        onCheckedChange\
+                        onCheckedChange={(checked) => handleInputChange('hasComputer', checked)}
+                      />
+                      <div className="flex items-center space-x-2">
+                        <Tablet className="h-5 w-5 text-purple-500" />
+                        <Label htmlFor="hasComputer">Computer/Laptop</Label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  )
+}
