@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
+import { saveIntegrationConfig } from "@/lib/integration-config-db"
 
 // Helper function to calculate next sync time
 function getNextSyncTime(frequency: string): string {
@@ -43,29 +44,21 @@ export async function POST(request: NextRequest) {
       environment: credentials.environment,
     }
 
-    // Simulate saving the configuration to a database
-    const savedConfiguration = {
-      id: `axxess_config_${Date.now()}`,
+    // Persist configuration
+    await saveIntegrationConfig("axxess", {
       credentials: encryptedCredentials,
       syncSettings,
-      status: "active",
-      createdAt: new Date().toISOString(),
-      lastSync: null,
-      nextSync: getNextSyncTime(syncSettings.frequency),
-    }
-
-    console.log("Axxess configuration saved successfully:", {
-      id: savedConfiguration.id,
-      status: savedConfiguration.status,
-      nextSync: savedConfiguration.nextSync,
     })
+
+    const nextSync = getNextSyncTime(syncSettings.frequency)
+
+    console.log("Axxess configuration saved successfully")
 
     // Return a success response
     return NextResponse.json({
       success: true,
       message: "Axxess integration configured successfully!",
-      configId: savedConfiguration.id,
-      nextSync: savedConfiguration.nextSync,
+      nextSync,
     })
   } catch (error) {
     console.error("Axxess configuration error:", error)

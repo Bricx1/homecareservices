@@ -1,0 +1,7 @@
+CREATE TABLE IF NOT EXISTS integration_configs (
+  integration_id VARCHAR(50) PRIMARY KEY,
+  config JSON,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (integration_id) REFERENCES integrations(id)
+);
