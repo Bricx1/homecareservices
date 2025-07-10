@@ -30,3 +30,13 @@ export async function saveProcessedFax(record: FaxRecord) {
   ])
 }
 
+export async function getProcessedFaxes(): Promise<FaxRecord[]> {
+  const [rows] = await pool.query('SELECT * FROM processed_faxes ORDER BY received_at DESC')
+  return rows as FaxRecord[]
+}
+
+export async function getProcessedFaxById(faxId: string): Promise<FaxRecord | null> {
+  const [rows] = await pool.query('SELECT * FROM processed_faxes WHERE fax_id = ?', [faxId])
+  const records = rows as FaxRecord[]
+  return records[0] || null
+}
