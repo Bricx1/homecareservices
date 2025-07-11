@@ -17,6 +17,13 @@ EXTENDEDCARE_BASE_URL=https://api.extendedcare.com
 EXTENDEDCARE_API_KEY=your-extendedcare-api-key
 ```
 
+### Seed initial integrations
+To populate Firestore with the default integration records, run:
+
+```
+npx ts-node scripts/seed-firestore.ts
+```
+
 ## Development
 Install dependencies with `pnpm install` and run the development server:
 
